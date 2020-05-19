@@ -33,10 +33,14 @@ function whatIsMyNumber() public view returns (uint) {
 ```
 function sayHiToVitalik(string memory _name) public returns (string memory) {
   // Compares if _name equals "Vitalik". Throws an error and exits if not true.
-  // (Side note: Solidity doesn't have native string comparison, so we
-  // compare their keccak256 hashes to see if the strings are equal)
+  // Solidity中沒有原生的字串比較function，所以這邊採取比較keccak256的hash值來看這兩個字串是否相等
   require(keccak256(abi.encodePacked(_name)) == keccak256(abi.encodePacked("Vitalik")));
   // If it's true, proceed with the function:
   return "Hi!";
 }
 ```
+## Stroage vs Memory(Data 儲存的位置)
+1. Storage
+Storage 是永久儲存在整個blockchain中的變數
+2. Memory
+Memory 裡的變數則是暫時的，其會因為
