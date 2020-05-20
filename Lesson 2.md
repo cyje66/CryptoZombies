@@ -7,12 +7,12 @@
   //儲存一個uint，其代表一個address的帳戶餘額
   mapping (address => uint) public accountBalance;
   ```
-  此時的key : address , value : uint，另一個例子:
+  此時輸入的key 是 address , 回傳的value 是 uint，另一個例子:
   ```
   //根據一個人的userId來查詢/儲存帳戶擁有者的名稱
   mapping (uint => string) userIdToName;
   ```
-  此時的key : uint , value : string
+  此時輸入的key 是 uint , 回傳的value 是 string
 ## msg.sender
 回傳正在呼叫此function的那個人或智能合約之**地址(address)**，例如:
 ```
@@ -39,8 +39,14 @@ function sayHiToVitalik(string memory _name) public returns (string memory) {
   return "Hi!";
 }
 ```
-## Stroage vs Memory(Data 儲存的位置)
+## Storage vs Memory(Data 儲存的位置)
 1. Storage
 Storage 是永久儲存在整個blockchain中的變數
 2. Memory
-Memory 裡的變數則是暫時的，其會因為
+Memory 裡的變數則是暫時的，其會因為contract呼叫不同的function而被消除
+## internal & external(Solidity特有)
+1. internal:  
+跟private很像，但差別在宣告為internal的function可以被*繼承的類別*呼叫
+2. external:  
+很像public，但被宣告為此類型的function**只能**從contract外面被呼叫
+3. external vs public(之後補充) 
