@@ -46,5 +46,8 @@ NormalStruct normal = NormalStruct(10, 20, 30);
 MiniMe mini = MiniMe(10, 20, 30); 
 ```
 ## Time units
-1 minutes is 60, 1 hours is 3600, 1 days is 86400 
-## 
+Solidity內建的變數，1 minutes is 60, 1 hours is 3600, 1 days is 86400 
+## View 函數
+可以將function宣告爲 view 類型，這種情況下保證不修改狀態(只讀取)，所以當view functions由外部被呼叫時(called externally)不會耗費gas。 比較: constant/view/pure
+## Storage is expensive
+只要data寫入storage，他就永遠存在區塊鏈上，這樣花費的代價太高了。為了解決這個問題，我們可以在function內，宣告一個用memory存的array，這些array隨著function的結束而消失，而搭配view的使用可以節省gas的花費。
