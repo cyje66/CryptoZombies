@@ -13,3 +13,20 @@ web3.js提供一個在中間溝通的媒介，所以我們只需要跟簡易閱�
 CryptoZombies.methods.createRandomZombie("Vitalik Nakamoto 🤔")
   .send({ from: "0xb60e8dd61c5d32be8058bb8eb970870f07233155", gas: "3000000" })
 ```
+## call v.s send
+`call` 是用於`view`和`pure` function上，他只在本地節點執行，不會在區塊鏈上新增一筆交易。例如:
+```
+myContract.methods.myMethod(123).call()
+```
+`send`則會在區塊鏈上新增一筆交易，並且改變data值。例如:
+```
+myContract.methods.myMethod(123).send()
+```
+## 陣列取值
+```
+Zombie[] public zombies;
+```
+在Solidity中，當你宣告一個變數是public的話，它會以該變數的名稱自動生成一個`getter`的方法，例如你想找id=15的zombies你可以打:
+```
+zombies(15)
+```
