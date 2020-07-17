@@ -71,5 +71,6 @@ const contractInstance = await CryptoZombies.new();
 ```
 beforeEach(async () => {
   // let's put here the code that creates a new contract instance
+  contractInstance = await CryptoZombies.new();
 });
 ```
