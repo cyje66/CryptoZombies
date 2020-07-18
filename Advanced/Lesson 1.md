@@ -74,3 +74,19 @@ beforeEach(async () => {
   contractInstance = await CryptoZombies.new();
 });
 ```
+## selfdestruct()
+雖然`contract.new`使用起來很方便，但如果大家都可以創建無數個contract，區塊鏈就會變得很肥大，所以我們必須要把用完的contractInstance刪掉。
+* 首先，我們要在smart contract中加入kill():
+```
+function kill() public onlyOwner {
+   // selfdestruct()可以把某個address從區塊鏈中移除
+   selfdestruct(owner());
+}
+```
+* 接著，就像`beforeEach`一樣，我們也需要`afterEach`:
+```
+afterEach(async () => {
+   await contractInstance.kill();
+});
+```
+## 
