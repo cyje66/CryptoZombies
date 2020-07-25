@@ -157,3 +157,103 @@ Contract: CryptoZombies
   2 passing (827ms)
   3 pending
 ```
+## Time traveling
+在測試攻擊殭屍的功能時，我們發現了一個問題:
+```
+it("zombies should be able to attack another zombie", async () => {
+        let result;
+        result = await contractInstance.createRandomZombie(zombieNames[0], {from: alice});
+        const firstZombieId = result.logs[0].args.zombieId.toNumber();
+        result = await contractInstance.createRandomZombie(zombieNames[1], {from: bob});
+        const secondZombieId = result.logs[0].args.zombieId.toNumber();
+        //TODO: increase the time
+        await contractInstance.attack(firstZombieId, secondZombieId, {from: alice});
+        assert.equal(result.receipt.status, true);
+    })
+```
+結果回傳...
+```
+Contract: CryptoZombies
+    ✓ should be able to create a new zombie (102ms)
+    ✓ should not allow two zombies (321ms)
+    ✓ should return the correct owner (333ms)
+    1) zombies should be able to attack another zombie
+    with the single-step transfer scenario
+      ✓ should transfer a zombie (307ms)
+    with the two-step transfer scenario
+      ✓ should approve and then transfer a zombie when the approved address calls transferFrom (357ms)
+
+
+  5 passing (7s)
+  1 failing
+
+  1) Contract: CryptoZombies
+       zombies should be able to attack another zombie:
+     Error: Returned error: VM Exception while processing transaction: revert
+```
+為什麼出錯了呢?我們來看一下`createRandomZombie()`:
+```
+function createRandomZombie(string _name) public {
+  require(ownerZombieCount[msg.sender] == 0);
+  uint randDna = _generateRandomDna(_name);
+  randDna = randDna - randDna % 100;
+  _createZombie(_name, randDna);
+}
+```
+再看看`_createZombie()`:
+```
+function _createZombie(string _name, uint _dna) internal {
+  uint id = zombies.push(Zombie(_name, _dna, 1, uint32(now + cooldownTime), 0, 0)) - 1;
+  zombieToOwner[id] = msg.sender;
+  ownerZombieCount[msg.sender] = ownerZombieCount[msg.sender].add(1);
+  emit NewZombie(id, _name, _dna);
+}
+```
+原來是因為我們在設計時，讓使用者要等一天才能再次attack或feed的機制，所以出了error。因此我們使用Ganache提供的兩個function來解決問題:
+* evm_increaseTime: increases the time for the next block.
+* evm_mine: mines a new block.
+解釋一下他的運作原理:
+* 每當有一個新的區塊被驗證(mined)，礦工就會在那個block貼上timestamp。假設新增殭屍的transaction在第五個block被驗證(mined)。
+* 接著，我們呼叫`evm_increasetime`，由於區塊鏈是無法被修改的，所以contract會檢查時間，但不會進行更改。
+* 如果我們執行`evm_mine`，第六個block就會被驗證(還有timestamped)，代表說當我們讓殭屍進行攻擊，smart contract會「認為」已經過了一天了。
+## More expressive assertions with Chai
+我們原本是用內建的module來進行一些判斷(assert)，但這樣會造成閱讀上的困難，所以我們改用另一個強大的工具----Chai。  
+用以下指令就能安裝:`npm -g install chai`，其import語法:`var expect = require('chai').expect;`  
+三個Chai的assertion style:
+* expect: lets you chain natural language assertions as follows:
+```
+let lessonTitle = "Testing Smart Contracts with Truffle";
+expect(lessonTitle).to.be.a("string");
+```
+* should: allows for similar assertions as expect interface, but the chain starts with a should property:
+```
+let lessonTitle = "Testing Smart Contracts with Truffle";
+lessonTitle.should.be.a("string");
+```
+* assert: provides a notation similar to that packaged with node.js and includes several additional tests and it's browser compatible:
+```
+let lessonTitle = "Testing Smart Contracts with Truffle";
+assert.typeOf(lessonTitle, "string");
+```
+## Loom
+在Loom上，使用者可以取得比Ethereum快的速度而且gas-free的transactions。
+### Configure Truffle for Testing on Loom
+```
+loom_testnet: {
+      provider: function() {
+        const privateKey = 'YOUR_PRIVATE_KEY';
+        const chainId = 'extdev-plasma-us1';
+        const writeUrl = 'wss://extdev-basechain-us1.dappchains.com/websocket';
+        const readUrl = 'wss://extdev-basechain-us1.dappchains.com/queryws';
+        return new LoomTruffleProvider(chainId, writeUrl, readUrl, privateKey);
+      },
+      network_id: 'extdev'
+    }
+```
+### The accounts array
+```
+const loomTruffleProvider = new LoomTruffleProvider(chainId, writeUrl, readUrl, privateKey);
+// Using the mnemonic code to create 10 accounts
+loomTruffleProvider.createExtraAccountsFromMnemonic(mnemonic, 10);
+return loomTruffleProvider;
+```
