@@ -195,7 +195,7 @@ module.exports = {
 };
 ```
 ## Whitelist your deployment keys
-在deploy到Basechain上之前，我們要先把私鑰加入白名單，參考這個教學: [Deploy to Mainnet](https://loomx.io/developers/en/deploy-loom-mainnet.html)
+在deploy到Basechain上之前，我們要先把私鑰加入白名單，參考這個教學: [Deploy to Mainnet](https://loomx.io/developers/en/deploy-loom-mainnet.html)  
 最後執行:
 ```
 truffle migrate --network basechain
