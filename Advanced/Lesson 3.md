@@ -25,3 +25,44 @@ Wrote to /Users/CZ/Documents/EthPriceOracle/package.json:
 //npm i <package-a> <package-b> <package-c>
 npm i truffle openzeppelin-solidity loom-js loom-truffle-provider bn.js axios
 ```
+## Calling other contract
+前面有提到Caller smart contract，它的功能就是知道現在1ETH值多少USD，而要讓他與oracle互動，我們需要提供以下兩點資訊:
+* The address of the oracle smart contract
+* The signature of the function you want to call
+為了方便日後維護，我們要寫一個function來把oracle smart contract的地址儲存在一個變數裡，然後我們就可以產生oracle smart contract的實例，好讓我們可以使用裡面的function。
+## Calling the oracle contract
+為了要讓caller contract能夠與oracle互動，我們需要建立`interface`:
+```
+pragma solidity 0.5.0;
+contract EthPriceOracleInterface {
+  function getLatestEthPrice() public returns (uint256);
+}
+```
+* import interface
+```
+import "./EthPriceOracleInterface.sol";
+```
+* 新增一變數`oracleInstace`，並令他為private型態
+```
+EthPriceOracleInterface private oracleInstance;
+```
+* instantiate EthPriceOracleInterface
+```
+oracleInstance = EthPriceOracleInterface(oracleAddress);
+```
+最後結果:
+```
+pragma solidity 0.5.0;
+//1. Import from the "./EthPriceOracleInterface.sol" file
+import "./EthPriceOracleInterface.sol";
+contract CallerContract {
+  // 2. Declare `EthPriceOracleInterface`
+  EthPriceOracleInterface private oracleInstance;
+  address private oracleAddress;
+  function setOracleInstanceAddress (address _oracleInstanceAddress) public {
+    oracleAddress = _oracleInstanceAddress;
+    //3. Instantiate `EthPriceOracleInterface`
+    oracleInstance = EthPriceOracleInterface(oracleAddress);
+  }
+}
+```
