@@ -98,11 +98,11 @@ afterEach(async () => {
 * 最後，Truffle會確保每一個test結束後，都會執行此function。
 ## The context function
 是個讓我們可以團體測試(group test)的function。由於我們的cryptozombie是*ERC721*協定，所以我們有兩種transfer token的方式:  
-(1) 比較直觀的方法
+1. 第一種: 比較直觀的方法
 ```
 function transferFrom(address _from, address _to, uint256 _tokenId) external payable;
 ```
-(2) 先approve，再transfer
+2. 第二種: 先approve，再transfer
 ```
 function approve(address _approved, uint256 _tokenId) external payable;
 ```
@@ -142,7 +142,7 @@ Contract: CryptoZombies
 
   5 passing (2s)
 ```
-但很明顯的，我們`it()`裡根本沒放東西，所以他不應該是打勾的狀態。很簡單，只要在`context`前面加上`x`就可以了(it前也可以加)，變成`xcontext`。記得在補上程式碼後，把`x`刪除。
+但很明顯的，我們`it()`裡根本沒放東西，所以他不應該是打勾的狀態。很簡單，只要在`context`前面加上`x`就可以了(it前也可以加)，變成`xcontext`，這樣他就不會執行該context。記得在補上程式碼後，把`x`刪除。
 ```
 Contract: CryptoZombies
     ✓ should be able to create a new zombie (199ms)
@@ -158,7 +158,7 @@ Contract: CryptoZombies
   3 pending
 ```
 ## Time traveling
-在測試攻擊殭屍的功能時，我們發現了一個問題:
+在測試攻擊殭屍的功能時，我們發現了一個問題，程式碼如下:
 ```
 it("zombies should be able to attack another zombie", async () => {
         let result;
@@ -211,7 +211,7 @@ function _createZombie(string _name, uint _dna) internal {
 ```
 原來是因為我們在設計時，讓使用者要等一天才能再次attack或feed的機制，所以出了error。因此我們使用Ganache提供的兩個function來解決問題:
 * evm_increaseTime: increases the time for the next block.
-* evm_mine: mines a new block.
+* evm_mine: mines a new block.  
 解釋一下他的運作原理:
 * 每當有一個新的區塊被驗證(mined)，礦工就會在那個block貼上timestamp。假設新增殭屍的transaction在第五個block被驗證(mined)。
 * 接著，我們呼叫`evm_increasetime`，由於區塊鏈是無法被修改的，所以contract會檢查時間，但不會進行更改。
